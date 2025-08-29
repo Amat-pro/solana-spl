@@ -1,11 +1,11 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token_interface::{Mint, TokenInterface};
+use anchor_lang::solana_program::sysvar;
 
 declare_id!("3Qz4pVQkXBnWTjMzSJwUKRv6EHUnQa1t8a1rkpbUTETj");
 
 #[program]
 pub mod nft {
-    use anchor_lang::solana_program::sysvar;
     use anchor_spl::token_interface;
     use mpl_token_metadata::instructions::{CreateV1Cpi, CreateV1CpiAccounts, CreateV1InstructionArgs};
     use mpl_token_metadata::types::{PrintSupply, TokenStandard};
@@ -84,14 +84,17 @@ pub struct CreateNFT<'info> {
         init,
         payer = payer,
         mint::decimals = 6,
-        mint::authority = signer.key(),
-        mint::freeze_authority = signer.key(),
+        mint::authority = payer.key(),
+        mint::freeze_authority = payer.key(),
     )]
     pub mint: InterfaceAccount<'info, Mint>,
+    /// CHECK:
     #[account(mut)]
     pub recipient_ata: AccountInfo<'info>, // recipient ata
+    /// CHECK:
     #[account(mut)]
     pub metadata: AccountInfo<'info>, // metadata pda
+    /// CHECK:
     #[account(mut)]
     pub master_edition: AccountInfo<'info>, // master edition pda
 
@@ -107,5 +110,6 @@ pub struct CreateNFT<'info> {
 
     // instructions
     #[account(address = sysvar::instructions::ID)]
+    /// CHECK:
     pub sysvar_instructions: AccountInfo<'info>,
 }

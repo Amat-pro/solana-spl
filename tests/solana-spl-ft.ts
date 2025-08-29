@@ -1,6 +1,7 @@
-import * as anchor from "@coral-xyz/anchor";
-import { Program } from "@coral-xyz/anchor";
-import { SolanaSpl } from "../target/types/solana_spl";
+import pkg from '@coral-xyz/anchor';
+const { BN } = pkg; // !!!
+import { Program ,workspace, AnchorProvider, setProvider } from "@coral-xyz/anchor";
+import { SolanaSpl } from "../target/types/solana_spl.js";
 import { Keypair } from "@solana/web3.js";
 import {
   TOKEN_PROGRAM_ID,
@@ -8,34 +9,39 @@ import {
   getAccount,
   getMint
 } from "@solana/spl-token";
+import fs from "fs";
 
 describe("solana-ft", () => {
   // 1. 设置Anchor Provider
-  const provider = anchor.AnchorProvider.env()
-  anchor.setProvider(provider);
+  const provider = AnchorProvider.env();
+  setProvider(provider);
 
   // 2. program
-  const program = anchor.workspace.SolanaSpl as Program<SolanaSpl>;
+  const program = workspace.SolanaSpl as Program<SolanaSpl>;
 
-  // 3. test account
-  const signer = Keypair.generate();
-
-  // 4. airdrop一些SOL用于支付费用
-  before(async () => {
-    const sig = await provider.connection.requestAirdrop(
-      signer.publicKey,
-      2 * anchor.web3.LAMPORTS_PER_SOL // 2 sol
-    );
-    const latestBlockhash = await provider.connection.getLatestBlockhash();
-    await provider.connection.confirmTransaction(
-      {
-        signature: sig,
-        blockhash: latestBlockhash.blockhash,
-        lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
-      },
-      "confirmed"
-    );
-  });
+  // // 3. test account
+  // const signer = Keypair.generate();
+  //
+  // // 4. airdrop一些SOL用于支付费用
+  // before(async () => {
+  //   const sig = await provider.connection.requestAirdrop(
+  //     signer.publicKey,
+  //     2 * anchor.web3.LAMPORTS_PER_SOL // 2 sol
+  //   );
+  //   const latestBlockhash = await provider.connection.getLatestBlockhash();
+  //   await provider.connection.confirmTransaction(
+  //     {
+  //       signature: sig,
+  //       blockhash: latestBlockhash.blockhash,
+  //       lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
+  //     },
+  //     "confirmed"
+  //   );
+  // });
+  // balance > 0 的payer
+  const secretKeyString = fs.readFileSync("testdata/id.json", { encoding: "utf-8" });
+  const secretKey = Uint8Array.from(JSON.parse(secretKeyString));
+  const signer = Keypair.fromSecretKey(secretKey);
 
   it("Create Mint", async () => {
     const mintKeypair = Keypair.generate();
@@ -82,7 +88,7 @@ describe("solana-ft", () => {
     console.log("crate ATA success, ATA: ", ataPublicKey);
 
     // 3. mint tokens
-    const amount = new anchor.BN(10 * (10 ** mintInfo.decimals));
+    const amount = new BN(10 * (10 ** mintInfo.decimals));
     const createTokenTx = await program.methods
       .mintTokens(amount)
       .accounts({
@@ -97,11 +103,11 @@ describe("solana-ft", () => {
 
     // 查询ATA余额
     const ataInfo = await getAccount(provider.connection, ataPublicKey);
-    console.log("ATA info: ", ataInfo)
+    console.log("ATA info: ", ataInfo);
 
     // 查询Mint Supply
-    const mintInfo2 = await getMint(provider.connection, mintKeypair.publicKey)
-    console.log("Mint info: ", mintInfo2)
+    const mintInfo2 = await getMint(provider.connection, mintKeypair.publicKey);
+    console.log("Mint info: ", mintInfo2);
 
     // 4. transfer tokens ataPublicKey -> ataToPublicKey
     const owner = Keypair.generate(); // signer已经有这个Mint的ATA了，需要创建另一个owner
@@ -114,7 +120,7 @@ describe("solana-ft", () => {
     console.log("crate ATA To success, ATA: ", ataToPublicKey);
 
     const transferTx = await program.methods
-      .transferTokens(new anchor.BN((10 ** mintInfo.decimals)))
+      .transferTokens(new BN((10 ** mintInfo.decimals)))
       .accounts({
         from: ataPublicKey,
         to: ataToPublicKey,
@@ -128,15 +134,15 @@ describe("solana-ft", () => {
 
     // 查询ATA余额
     const ataInfo2 = await getAccount(provider.connection, ataPublicKey);
-    console.log("ATA From info: ", ataInfo2)
+    console.log("ATA From info: ", ataInfo2);
 
     // 查询ATA余额
     const ataInfo3 = await getAccount(provider.connection, ataToPublicKey);
-    console.log("ATA To info: ", ataInfo3)
+    console.log("ATA To info: ", ataInfo3);
 
     // 查询Mint Supply
-    const mintInfo3 = await getMint(provider.connection, mintKeypair.publicKey)
-    console.log("Mint info: ", mintInfo3)
+    const mintInfo3 = await getMint(provider.connection, mintKeypair.publicKey);
+    console.log("Mint info: ", mintInfo3);
 
   });
 });

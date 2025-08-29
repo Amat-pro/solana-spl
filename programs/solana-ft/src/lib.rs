@@ -58,7 +58,7 @@ pub struct CreateMint<'info> {
     // mint.freeze_authority: 冻结账户权限
     pub mint: InterfaceAccount<'info, Mint>, // mint
     #[account(address = anchor_spl::token::ID)]
-    pub token_program: Interface<'info, TokenInterface>, // spl token program
+    pub token_program: Interface<'info, TokenInterface>, // spl token program 必须要有不然会报错！！！
     pub system_program: Program<'info, System>, // system program 系统程序用创建账户
 }
 
