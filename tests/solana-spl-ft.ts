@@ -46,7 +46,7 @@ describe("solana-ft", () => {
       .accounts({
         signer: signer.publicKey,
         mint: mintKeypair.publicKey,
-        tokenProgram: TOKEN_PROGRAM_ID,
+        // tokenProgram: TOKEN_PROGRAM_ID,
         // systemProgram 在idl中已经hard code为11111111111111111111111111111111
       })
       .signers([signer, mintKeypair]) // signer签名交易，mintKeypair签名init mint账户
@@ -64,7 +64,7 @@ describe("solana-ft", () => {
       .accounts({
         signer: signer.publicKey,
         mint: mintKeypair.publicKey,
-        tokenProgram: TOKEN_PROGRAM_ID,
+        // tokenProgram: TOKEN_PROGRAM_ID,
         // systemProgram 在idl中已经hard code为11111111111111111111111111111111
       })
       .signers([signer, mintKeypair]) // signer签名交易，mintKeypair签名init mint账户
@@ -121,7 +121,7 @@ describe("solana-ft", () => {
         to: ataToPublicKey,
         mint: mintKeypair.publicKey,
         authority: signer.publicKey,
-        tokenProgram:TOKEN_PROGRAM_ID,
+        // tokenProgram:TOKEN_PROGRAM_ID,
       })
       .signers([signer])
       .rpc();

@@ -57,6 +57,7 @@ pub struct CreateMint<'info> {
     // mint.authority: 铸币权限
     // mint.freeze_authority: 冻结账户权限
     pub mint: InterfaceAccount<'info, Mint>, // mint
+    #[account(address = anchor_spl::token::ID)]
     pub token_program: Interface<'info, TokenInterface>, // spl token program
     pub system_program: Program<'info, System>, // system program 系统程序用创建账户
 }
@@ -70,6 +71,7 @@ pub struct MintTokens<'info> {
     pub token_account: InterfaceAccount<'info, TokenAccount>, // destination token account  mut: supply 会增加 → 需要 mutable
     #[account(mut)]
     pub mint: InterfaceAccount<'info, Mint>, // 代币Mint   mut: supply 会增加 → 需要 mutable
+    #[account(address = anchor_spl::token::ID)]
     pub token_program: Interface<'info, TokenInterface> // spl token程序
 }
 
@@ -82,6 +84,7 @@ pub struct TransferTokens<'info> {
     pub to: InterfaceAccount<'info, TokenAccount>,
     pub mint: InterfaceAccount<'info, Mint>,
     pub authority: Signer<'info>,
+    #[account(address = anchor_spl::token::ID)]
     pub token_program: Interface<'info, TokenInterface>
 }
 
