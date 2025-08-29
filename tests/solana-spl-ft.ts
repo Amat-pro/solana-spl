@@ -8,7 +8,6 @@ import {
   getAccount,
   getMint
 } from "@solana/spl-token";
-import * as punycode from "node:punycode";
 
 describe("solana-ft", () => {
   // 1. 设置Anchor Provider
@@ -90,7 +89,7 @@ describe("solana-ft", () => {
         signer: signer.publicKey,
         tokenAccount: ataPublicKey,
         mint: mintKeypair.publicKey,
-        tokenProgram: TOKEN_PROGRAM_ID,
+        // tokenProgram: TOKEN_PROGRAM_ID,
       } as any)
       .signers([signer])
       .rpc();
