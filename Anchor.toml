@@ -5,19 +5,19 @@ package_manager = "yarn"
 resolution = true
 skip-lint = false
 
-[programs.localnet]
-nft = "CjLs3iFDVrtJwXpubVaGmz2hJrVR4F9UAYxma2oxwL2G"
-solana_ft = "DwHi4VJYSKnYfirUqRfh5Gq2XwCq14fvKZTtBTRnrJ1K"
-
 [programs.devnet]
-nft = "CjLs3iFDVrtJwXpubVaGmz2hJrVR4F9UAYxma2oxwL2G"
-solana_ft = "DwHi4VJYSKnYfirUqRfh5Gq2XwCq14fvKZTtBTRnrJ1K"
+nft = "CG8fMTSXzerzXDNG8obwvqWdYcvTEFeRNyfAqT1X77SG"
+solana_ft = "BCUYjV31y4uGKGwUUc4p9Kii8Dx8ucnD9bgX4K8CjFwP"
+
+[programs.localnet]
+nft = "CG8fMTSXzerzXDNG8obwvqWdYcvTEFeRNyfAqT1X77SG"
+solana_ft = "BCUYjV31y4uGKGwUUc4p9Kii8Dx8ucnD9bgX4K8CjFwP"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "Devnet"
+cluster = "devnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]

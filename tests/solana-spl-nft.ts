@@ -10,6 +10,7 @@ describe("solana-nft", () => {
   setProvider(provider);
 
   const program = workspace.Nft as Program<Nft>;
+    console.log("program address: ", program.programId.toString());
 
   // balance > 0 的payer
   const secretKeyString = fs.readFileSync("testdata/id.json", { encoding: "utf-8" });
@@ -38,7 +39,7 @@ describe("solana-nft", () => {
     const uri = "My-NFT-URI";
 
     // 2. create recipient ata
-    // TODO: 应该先创建mint后才能创建ATA
+    // 应该先创建mint后才能创建ATA !!!
     const ataPublicKey = await createAssociatedTokenAccount(
       provider.connection,
       payer, // payer
@@ -47,7 +48,7 @@ describe("solana-nft", () => {
     );
     console.log("crate recipient ATA success, ATA: ", ataPublicKey);
 
-    // 3. metadata and master edition
+    // 3. metadata and master edition TODO: 这里报错了 太长了
     const metadataProgramPublicKey = new PublicKey(MPL_TOKEN_METADATA_PROGRAM_ID.toString());
     const metadataRet = PublicKey.findProgramAddressSync(
       [

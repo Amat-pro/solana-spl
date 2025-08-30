@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 use anchor_spl::token_interface::{Mint, TokenInterface};
 use anchor_lang::solana_program::sysvar;
 
-declare_id!("CjLs3iFDVrtJwXpubVaGmz2hJrVR4F9UAYxma2oxwL2G");
+declare_id!("CG8fMTSXzerzXDNG8obwvqWdYcvTEFeRNyfAqT1X77SG");
 
 #[program]
 pub mod nft {

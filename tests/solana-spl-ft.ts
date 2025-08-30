@@ -18,6 +18,7 @@ describe("solana-ft", () => {
 
   // 2. program
   const program = workspace.SolanaSpl as Program<SolanaSpl>;
+  console.log("program address: ", program.programId.toString());
 
   // // 3. test account
   // const signer = Keypair.generate();
