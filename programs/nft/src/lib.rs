@@ -1,8 +1,9 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token_interface::{Mint, TokenInterface};
 use anchor_lang::solana_program::sysvar;
+use anchor_spl::token_interface::spl_token_metadata_interface::state::TokenMetadata;
 
-declare_id!("CG8fMTSXzerzXDNG8obwvqWdYcvTEFeRNyfAqT1X77SG");
+declare_id!("G2DxiTY7jkmsrTZLFDriFvH4rw76UsiQyj3tNoZotgcM");
 
 #[program]
 pub mod nft {
@@ -41,6 +42,7 @@ pub mod nft {
             print_supply: Some(PrintSupply::Zero),
         };
 
+        msg!("==> start token metadata ");
         let token_metadata_program_info = ctx.accounts.token_metadata_program.to_account_info();
         let metadata_pda_info = ctx.accounts.metadata.to_account_info();
         let master_edition_pda_info = ctx.accounts.master_edition.to_account_info();
@@ -48,7 +50,8 @@ pub mod nft {
         let payer_info = ctx.accounts.payer.to_account_info();
         let system_program_info = ctx.accounts.system_program.to_account_info();
         let sysvar_instructions_info = ctx.accounts.sysvar_instructions.to_account_info();
-        let cpi_accounts = CreateV1CpiAccounts {
+        let token_program = ctx.accounts.token_program.to_account_info();
+        let create_cpi_accounts = CreateV1CpiAccounts {
             metadata: &metadata_pda_info,
             master_edition: Some(&master_edition_pda_info),
             mint: (&mint_info, true),
@@ -57,15 +60,21 @@ pub mod nft {
             update_authority: (&payer_info, true),
             system_program: &system_program_info,
             sysvar_instructions: &sysvar_instructions_info,
-            spl_token_program: None,
+            spl_token_program: Some(&token_program),
         };
         let cpi = CreateV1Cpi::new(
             &token_metadata_program_info,
-            cpi_accounts,
+            create_cpi_accounts,
             args,
         );
 
-        let _ = cpi.invoke()?;
+        let invoke_result = cpi.invoke();
+        if let Err(e) = invoke_result {
+            // 打印错误信息
+            msg!("Error invoking token metadata program: {:?}", e);
+            return Err(e.into());
+        }
+        msg!("==> token metadata invoke success: {:?}", invoke_result);
 
         // 2. mint 1 token ro recipient
         let cpi_accounts = token_interface::MintTo {

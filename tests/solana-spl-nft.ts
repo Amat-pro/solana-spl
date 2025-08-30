@@ -48,25 +48,28 @@ describe("solana-nft", () => {
     );
     console.log("crate recipient ATA success, ATA: ", ataPublicKey);
 
-    // 3. metadata and master edition TODO: 这里报错了 太长了
+    // 3. metadata and master edition
     const metadataProgramPublicKey = new PublicKey(MPL_TOKEN_METADATA_PROGRAM_ID.toString());
-    const metadataRet = PublicKey.findProgramAddressSync(
+    const metadataRet = PublicKey.findProgramAddressSync( // 总长度不超过128 byte
       [
-        Buffer.from("metadata"),
-        Buffer.from(metadataProgramPublicKey.toString()),
-        mintKeypair.publicKey.toBuffer(),
+        Buffer.from("metadata"), // 8 byte
+        metadataProgramPublicKey.toBuffer(), // 32 byte
+        mintKeypair.publicKey.toBuffer(), // 32 byte
       ],
       metadataProgramPublicKey,
     );
-    const mastEditionRet = PublicKey.findProgramAddressSync(
+    console.log("metadataRet: ", metadataRet);
+
+    const mastEditionRet = PublicKey.findProgramAddressSync( // 总长度不超过128 byte
       [
-        Buffer.from("metadata"),
-        Buffer.from(metadataProgramPublicKey.toString()),
-        mintKeypair.publicKey.toBuffer(),
-        Buffer.from("edition"),
+        Buffer.from("metadata"), // 8 byte
+        metadataProgramPublicKey.toBuffer(), // 32 byte
+        mintKeypair.publicKey.toBuffer(), // 32 byte
+        Buffer.from("edition"), // 32 byte
       ],
       metadataProgramPublicKey,
     );
+    console.log("mastEditionRet: ", mastEditionRet);
 
     const tx = await program.methods
       .createNft(name, symbol, uri, 500)
@@ -77,7 +80,7 @@ describe("solana-nft", () => {
         metadata: metadataRet[0],
         masterEdition: mastEditionRet[0],
       })
-      .signers([payer,mintKeypair])
+      .signers([payer])
       .rpc();
     console.log("create nft success ", tx);
 

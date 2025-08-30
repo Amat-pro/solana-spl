@@ -8,12 +8,9 @@ yarn install
 anchor build
 anchor deploy // 这里执行可能会报错，有可能buffer size too small 或者上次执行中断导致  删除buffer后重新执行
 anchor keys sync
-更新target/idl里的address、target/typs里的address 
-# anchor run test 或者 anchor test --skip-build --skip-deploy
+# 更新target/idl里的address、target/typs里的address  然后anchor run test 或者 anchor test --skip-build --skip-deploy
        # 会报错Error: AnchorError occurred. Error Code: DeclaredProgramIdMismatch. Error Number: 4100. Error Message: The declared program id does not match the actual program id.
-anchor deploy => 更新programID后需要重新部署一下，可能是第一次部署后program里的declare_id!("ProgramID")和部署后生成的新的programID不匹配
-       # 这里再次执行anchor deploy没有报错，可能和declare_id不一致有关 declare_id一样后再执行anchor deploy会报错ERROR solana_cli::program] AlreadyProcessed 
-       # 后续的重新部署应该走anchor upgrade，这样也能避免buffer size too small的问题
+anchor build && anchor upgrade -p <progrmID> filepath => 更新programID后需要重新部署一下，可能是第一次部署后program里的declare_id!("ProgramID")和部署后生成的新的programID不匹配
 anchor run test
 ```
 
@@ -25,4 +22,5 @@ anchor run test
 
 删除他们(可能需要等一会才能删除完成)：solana program close <BUFFER_KEY>
 ### [ERROR solana_cli::program] AlreadyProcessed
-应该是上一次执行中断了，删除buffers后重新执行deploy
+1. 上一次执行中断了，删除buffers后重新执行deploy
+2. declare_id!(programID) 这个programID是被close的，换一个其他的programId重新编译部署

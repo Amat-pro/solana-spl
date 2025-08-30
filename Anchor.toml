@@ -6,8 +6,8 @@ resolution = true
 skip-lint = false
 
 [programs.devnet]
-nft = "CG8fMTSXzerzXDNG8obwvqWdYcvTEFeRNyfAqT1X77SG"
-solana_ft = "BCUYjV31y4uGKGwUUc4p9Kii8Dx8ucnD9bgX4K8CjFwP"
+nft = "G2DxiTY7jkmsrTZLFDriFvH4rw76UsiQyj3tNoZotgcM"
+solana_ft = "3Nw3Qe4tPVRwHi1bMzpm5Qi3t2VE2EGfqz9NYgJKoXHU"
 
 [programs.localnet]
 nft = "CG8fMTSXzerzXDNG8obwvqWdYcvTEFeRNyfAqT1X77SG"
