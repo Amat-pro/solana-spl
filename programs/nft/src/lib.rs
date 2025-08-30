@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 use anchor_spl::token_interface::{Mint, TokenInterface};
 use anchor_lang::solana_program::sysvar;
 
-declare_id!("3Qz4pVQkXBnWTjMzSJwUKRv6EHUnQa1t8a1rkpbUTETj");
+declare_id!("CjLs3iFDVrtJwXpubVaGmz2hJrVR4F9UAYxma2oxwL2G");
 
 #[program]
 pub mod nft {
@@ -10,6 +10,11 @@ pub mod nft {
     use mpl_token_metadata::instructions::{CreateV1Cpi, CreateV1CpiAccounts, CreateV1InstructionArgs};
     use mpl_token_metadata::types::{PrintSupply, TokenStandard};
     use super::*;
+
+    pub fn create_mint(_ctx: Context<CreateMint>) ->Result<()> {
+        msg!("Creating a new mint...");
+        Ok(())
+    }
 
     pub fn create_nft(
         ctx: Context<CreateNFT>,
@@ -77,16 +82,29 @@ pub mod nft {
 }
 
 #[derive(Accounts)]
+pub struct CreateMint<'info> {
+    #[account(mut)]
+    pub signer: Signer<'info>,
+    #[account(
+        init,
+        payer = signer,
+        mint::decimals = 0,
+        mint::authority = signer.key(),
+        mint::freeze_authority = signer.key(),
+    )]
+    pub mint: InterfaceAccount<'info, Mint>,
+
+    // programs
+    #[account(address = anchor_spl::token::ID)]
+    pub token_program: Interface<'info, TokenInterface>,
+    pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
 pub struct CreateNFT<'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
-    #[account(
-        init,
-        payer = payer,
-        mint::decimals = 6,
-        mint::authority = payer.key(),
-        mint::freeze_authority = payer.key(),
-    )]
+    #[account(mut)]
     pub mint: InterfaceAccount<'info, Mint>,
     /// CHECK:
     #[account(mut)]

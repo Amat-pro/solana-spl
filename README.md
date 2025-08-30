@@ -5,5 +5,6 @@
 ## Run localnet
 ```shell
 yarn install
-anchor test
+anchor build
+anchor test --skip-build --skip-deploy
 ```

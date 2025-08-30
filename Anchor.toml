@@ -6,14 +6,18 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-nft = "3Qz4pVQkXBnWTjMzSJwUKRv6EHUnQa1t8a1rkpbUTETj"
-solana_ft = "8vSHPeRMpq3k5KDj72rk52yWNxdtg9TwNusBfxyiJ5P1"
+nft = "CjLs3iFDVrtJwXpubVaGmz2hJrVR4F9UAYxma2oxwL2G"
+solana_ft = "DwHi4VJYSKnYfirUqRfh5Gq2XwCq14fvKZTtBTRnrJ1K"
+
+[programs.devnet]
+nft = "CjLs3iFDVrtJwXpubVaGmz2hJrVR4F9UAYxma2oxwL2G"
+solana_ft = "DwHi4VJYSKnYfirUqRfh5Gq2XwCq14fvKZTtBTRnrJ1K"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "localnet"
+cluster = "Devnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]

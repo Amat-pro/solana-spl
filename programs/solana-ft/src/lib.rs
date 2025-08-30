@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 use anchor_spl::token_interface::{self, Mint, TokenInterface, TokenAccount};
 
 // 部署后用 anchor keys sync 更新
-declare_id!("8vSHPeRMpq3k5KDj72rk52yWNxdtg9TwNusBfxyiJ5P1");
+declare_id!("DwHi4VJYSKnYfirUqRfh5Gq2XwCq14fvKZTtBTRnrJ1K");
 
 #[program]
 pub mod solana_spl {

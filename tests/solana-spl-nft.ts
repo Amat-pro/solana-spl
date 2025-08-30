@@ -2,7 +2,7 @@ import {Nft} from "../target/types/nft.js";
 import { Program, AnchorProvider, workspace, setProvider } from "@coral-xyz/anchor";
 import fs from "fs";
 import { Keypair, PublicKey } from "@solana/web3.js";
-import { createAssociatedTokenAccount, getAccount } from "@solana/spl-token";
+import { createAssociatedTokenAccount, getAccount, getMint } from "@solana/spl-token";
 import { MPL_TOKEN_METADATA_PROGRAM_ID } from "@metaplex-foundation/mpl-token-metadata";
 
 describe("solana-nft", () => {
@@ -19,12 +19,26 @@ describe("solana-nft", () => {
   it("Nft", async () => {
     // 1. create mint
     const mintKeypair = Keypair.generate();
+    const mintTx = await program.methods
+      .createMint()
+      .accounts({
+        signer: payer.publicKey,
+        mint: mintKeypair.publicKey,
+        // tokenProgram: TOKEN_PROGRAM_ID,
+        // systemProgram 在idl中已经hard code为11111111111111111111111111111111
+      })
+      .signers([payer, mintKeypair]) // signer签名交易，mintKeypair签名init mint账户
+      .rpc();
+    console.log("create mint done, tx：", mintTx);
+    const mintInfo = await getMint(provider.connection, mintKeypair.publicKey);
+    console.log("mint info: ", mintInfo);
 
     const name = "My-NFT";
     const symbol = "My-NFT-SYMBOL";
     const uri = "My-NFT-URI";
 
     // 2. create recipient ata
+    // TODO: 应该先创建mint后才能创建ATA
     const ataPublicKey = await createAssociatedTokenAccount(
       provider.connection,
       payer, // payer
