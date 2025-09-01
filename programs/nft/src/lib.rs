@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token_interface::{Mint, TokenInterface};
 use anchor_lang::solana_program::sysvar;
-use anchor_spl::token_interface::spl_token_metadata_interface::state::TokenMetadata;
+use anchor_spl::metadata::Metadata;
 
 declare_id!("G2DxiTY7jkmsrTZLFDriFvH4rw76UsiQyj3tNoZotgcM");
 
@@ -17,6 +17,7 @@ pub mod nft {
         Ok(())
     }
 
+    /// create_nft 执行完成后，mint的mint_authority会变更为metaplex某个pda而不再是payer
     pub fn create_nft(
         ctx: Context<CreateNFT>,
         name: String,
@@ -24,7 +25,21 @@ pub mod nft {
         uri: String,
         seller_fee_basis_points: u16,
     ) -> Result<()> {
-        // 1. metadata + master edition
+
+        // 这里如果先执行mpl_token_metadata的CPI, mint的mint_authority发生了改变
+        // 那么再通过pager作为signer执行MintTo就会报错
+
+        // 1. mint 1 token ro recipient
+        let cpi_accounts = token_interface::MintTo {
+            mint: ctx.accounts.mint.to_account_info(),
+            to: ctx.accounts.recipient_ata.to_account_info(),
+            authority: ctx.accounts.signer.to_account_info(),
+        };
+        let cpi_program = ctx.accounts.token_program.to_account_info();
+        let cpi_context = CpiContext::new(cpi_program, cpi_accounts);
+        token_interface::mint_to(cpi_context, 1)?;
+
+        // 2. metadata + master edition
         let args = CreateV1InstructionArgs{
             name,
             symbol,
@@ -47,21 +62,22 @@ pub mod nft {
         let metadata_pda_info = ctx.accounts.metadata.to_account_info();
         let master_edition_pda_info = ctx.accounts.master_edition.to_account_info();
         let mint_info = ctx.accounts.mint.to_account_info();
-        let payer_info = ctx.accounts.payer.to_account_info();
+        let payer_info = ctx.accounts.signer.to_account_info();
         let system_program_info = ctx.accounts.system_program.to_account_info();
         let sysvar_instructions_info = ctx.accounts.sysvar_instructions.to_account_info();
         let token_program = ctx.accounts.token_program.to_account_info();
         let create_cpi_accounts = CreateV1CpiAccounts {
             metadata: &metadata_pda_info,
             master_edition: Some(&master_edition_pda_info),
-            mint: (&mint_info, true),
+            mint: (&mint_info, false), // false=>不需要签名
             authority: &payer_info,
             payer: &payer_info,
-            update_authority: (&payer_info, true),
+            update_authority: (&payer_info, true), // true=>需要签名
             system_program: &system_program_info,
             sysvar_instructions: &sysvar_instructions_info,
             spl_token_program: Some(&token_program),
         };
+        // let _ = create_cpi_accounts;
         let cpi = CreateV1Cpi::new(
             &token_metadata_program_info,
             create_cpi_accounts,
@@ -75,17 +91,6 @@ pub mod nft {
             return Err(e.into());
         }
         msg!("==> token metadata invoke success: {:?}", invoke_result);
-
-        // 2. mint 1 token ro recipient
-        let cpi_accounts = token_interface::MintTo {
-            mint: ctx.accounts.mint.to_account_info(),
-            to: ctx.accounts.recipient_ata.to_account_info(),
-            authority: ctx.accounts.payer.to_account_info(),
-        };
-        let cpi_program = ctx.accounts.token_program.to_account_info();
-        let cpi_context = CpiContext::new(cpi_program, cpi_accounts);
-        token_interface::mint_to(cpi_context, 1)?;
-
         Ok(())
     }
 }
@@ -112,7 +117,7 @@ pub struct CreateMint<'info> {
 #[derive(Accounts)]
 pub struct CreateNFT<'info> {
     #[account(mut)]
-    pub payer: Signer<'info>,
+    pub signer: Signer<'info>,
     #[account(mut)]
     pub mint: InterfaceAccount<'info, Mint>,
     /// CHECK:
@@ -129,7 +134,7 @@ pub struct CreateNFT<'info> {
     #[account(address = anchor_spl::token::ID)]
     pub token_program: Interface<'info, TokenInterface>,
     #[account(address = mpl_token_metadata::ID)]
-    pub token_metadata_program: Interface<'info, TokenInterface>,
+    pub token_metadata_program: Program<'info, Metadata>,
     pub system_program: Program<'info, System>,
 
     // rent

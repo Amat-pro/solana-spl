@@ -22,5 +22,6 @@ anchor run test
 
 删除他们(可能需要等一会才能删除完成)：solana program close <BUFFER_KEY>
 ### [ERROR solana_cli::program] AlreadyProcessed
+1. anchor clean && anchor build && anchor upgrade -p xx filepath 重新编译更新试一下
 1. 上一次执行中断了，删除buffers后重新执行deploy
 2. declare_id!(programID) 这个programID是被close的，换一个其他的programId重新编译部署

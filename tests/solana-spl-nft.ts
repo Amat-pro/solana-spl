@@ -1,7 +1,7 @@
 import {Nft} from "../target/types/nft.js";
 import { Program, AnchorProvider, workspace, setProvider } from "@coral-xyz/anchor";
 import fs from "fs";
-import { Keypair, PublicKey } from "@solana/web3.js";
+import {Keypair, PublicKey, SendTransactionError} from "@solana/web3.js";
 import { createAssociatedTokenAccount, getAccount, getMint } from "@solana/spl-token";
 import { MPL_TOKEN_METADATA_PROGRAM_ID } from "@metaplex-foundation/mpl-token-metadata";
 
@@ -10,16 +10,18 @@ describe("solana-nft", () => {
   setProvider(provider);
 
   const program = workspace.Nft as Program<Nft>;
-    console.log("program address: ", program.programId.toString());
+  console.log("program address: ", program.programId.toString());
 
   // balance > 0 的payer
   const secretKeyString = fs.readFileSync("testdata/id.json", { encoding: "utf-8" });
   const secretKey = Uint8Array.from(JSON.parse(secretKeyString));
   const payer = Keypair.fromSecretKey(secretKey);
 
+  // mint
+  const mintKeypair = Keypair.generate();
+
   it("Nft", async () => {
-    // 1. create mint
-    const mintKeypair = Keypair.generate();
+    // create mint
     const mintTx = await program.methods
       .createMint()
       .accounts({
@@ -34,8 +36,9 @@ describe("solana-nft", () => {
     const mintInfo = await getMint(provider.connection, mintKeypair.publicKey);
     console.log("mint info: ", mintInfo);
 
+    // 1. create nft
     const name = "My-NFT";
-    const symbol = "My-NFT-SYMBOL";
+    const symbol = "My-SYMBOL"; // max.length = 10
     const uri = "My-NFT-URI";
 
     // 2. create recipient ata
@@ -47,6 +50,8 @@ describe("solana-nft", () => {
       payer.publicKey, // owner
     );
     console.log("crate recipient ATA success, ATA: ", ataPublicKey);
+    const ataInfo = await getAccount(provider.connection, ataPublicKey);
+    console.log("ATA info: ", ataInfo);
 
     // 3. metadata and master edition
     const metadataProgramPublicKey = new PublicKey(MPL_TOKEN_METADATA_PROGRAM_ID.toString());
@@ -71,20 +76,27 @@ describe("solana-nft", () => {
     );
     console.log("mastEditionRet: ", mastEditionRet);
 
-    const tx = await program.methods
-      .createNft(name, symbol, uri, 500)
-      .accounts({
-        payer: payer.publicKey,
-        mint: mintKeypair.publicKey,
-        recipientAta: ataPublicKey,
-        metadata: metadataRet[0],
-        masterEdition: mastEditionRet[0],
-      })
-      .signers([payer])
-      .rpc();
-    console.log("create nft success ", tx);
+    console.log("payer.key: ", payer.publicKey);
+    try {
+      const tx = await program.methods
+        .createNft(name, symbol, uri, 500)
+        .accounts({
+          signer: payer.publicKey,
+          mint: mintKeypair.publicKey,
+          recipientAta: ataPublicKey,
+          metadata: metadataRet[0],
+          masterEdition: mastEditionRet[0],
+        })
+        .signers([payer])
+        .rpc();
 
-    const recipientAtaInfo = await getAccount(provider.connection, ataPublicKey);
-    console.log("recipient ATA info: ", recipientAtaInfo);
+        console.log("create nft success ", tx);
+    } catch (e: any) {
+      if (e instanceof SendTransactionError) {
+        console.log("SendTransactionError: ", await e.getLogs(provider.connection));
+      } else {
+        console.log("err: ", e)
+      }
+    }
   });
-})
+});
