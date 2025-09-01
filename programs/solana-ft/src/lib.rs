@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 use anchor_spl::token_interface::{self, Mint, TokenInterface, TokenAccount};
 
 // 部署后用 anchor keys sync 更新
-declare_id!("8vSHPeRMpq3k5KDj72rk52yWNxdtg9TwNusBfxyiJ5P1");
+declare_id!("3Nw3Qe4tPVRwHi1bMzpm5Qi3t2VE2EGfqz9NYgJKoXHU");
 
 #[program]
 pub mod solana_spl {
@@ -58,7 +58,7 @@ pub struct CreateMint<'info> {
     // mint.freeze_authority: 冻结账户权限
     pub mint: InterfaceAccount<'info, Mint>, // mint
     #[account(address = anchor_spl::token::ID)]
-    pub token_program: Interface<'info, TokenInterface>, // spl token program
+    pub token_program: Interface<'info, TokenInterface>, // spl token program 必须要有不然会报错！！！
     pub system_program: Program<'info, System>, // system program 系统程序用创建账户
 }
 
