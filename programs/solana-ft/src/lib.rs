@@ -67,7 +67,7 @@ pub struct CreateMint<'info> {
 pub struct MintTokens<'info> {
     #[account(mut)] // 设置mut 不写编译不通过
     pub signer: Signer<'info>, // mint authority 必须是Mint的授权者
-    #[account(mut, has_one = mint)] // has_one = mint: 确保token_account属于这个Mint
+    #[account(mut, has_one = mint)] // has_one = mint 👉 Anchor 会检查 token_account.mint == mint.key()，否则报错
     pub token_account: InterfaceAccount<'info, TokenAccount>, // destination token account  mut: supply 会增加 → 需要 mutable
     #[account(mut)]
     pub mint: InterfaceAccount<'info, Mint>, // 代币Mint   mut: supply 会增加 → 需要 mutable
