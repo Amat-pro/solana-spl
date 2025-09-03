@@ -1,18 +1,20 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token_interface::{Mint, TokenInterface};
 use anchor_lang::solana_program::sysvar;
 use anchor_spl::metadata::Metadata;
+use anchor_spl::token_interface::{Mint, TokenInterface};
 
 declare_id!("G2DxiTY7jkmsrTZLFDriFvH4rw76UsiQyj3tNoZotgcM");
 
 #[program]
 pub mod nft {
-    use anchor_spl::token_interface;
-    use mpl_token_metadata::instructions::{CreateV1Cpi, CreateV1CpiAccounts, CreateV1InstructionArgs};
-    use mpl_token_metadata::types::{PrintSupply, TokenStandard};
     use super::*;
+    use anchor_spl::token_interface;
+    use mpl_token_metadata::instructions::{
+        CreateV1Cpi, CreateV1CpiAccounts, CreateV1InstructionArgs,
+    };
+    use mpl_token_metadata::types::{PrintSupply, TokenStandard};
 
-    pub fn create_mint(_ctx: Context<CreateMint>) ->Result<()> {
+    pub fn create_mint(_ctx: Context<CreateMint>) -> Result<()> {
         msg!("Creating a new mint...");
         Ok(())
     }
@@ -25,7 +27,6 @@ pub mod nft {
         uri: String,
         seller_fee_basis_points: u16,
     ) -> Result<()> {
-
         // 这里如果先执行mpl_token_metadata的CPI, mint的mint_authority发生了改变
         // 那么再通过pager作为signer执行MintTo就会报错
 
@@ -40,7 +41,7 @@ pub mod nft {
         token_interface::mint_to(cpi_context, 1)?;
 
         // 2. metadata + master edition
-        let args = CreateV1InstructionArgs{
+        let args = CreateV1InstructionArgs {
             name,
             symbol,
             uri,
@@ -78,11 +79,7 @@ pub mod nft {
             spl_token_program: Some(&token_program),
         };
         // let _ = create_cpi_accounts;
-        let cpi = CreateV1Cpi::new(
-            &token_metadata_program_info,
-            create_cpi_accounts,
-            args,
-        );
+        let cpi = CreateV1Cpi::new(&token_metadata_program_info, create_cpi_accounts, args);
 
         let invoke_result = cpi.invoke();
         if let Err(e) = invoke_result {

@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token_interface::{self, Mint, TokenInterface, TokenAccount};
+use anchor_spl::token_interface::{self, Mint, TokenAccount, TokenInterface};
 
 // 部署后用 anchor keys sync 更新
 declare_id!("3Nw3Qe4tPVRwHi1bMzpm5Qi3t2VE2EGfqz9NYgJKoXHU");
@@ -8,16 +8,16 @@ declare_id!("3Nw3Qe4tPVRwHi1bMzpm5Qi3t2VE2EGfqz9NYgJKoXHU");
 pub mod solana_spl {
     use super::*;
 
-    pub fn create_mint(_ctx: Context<CreateMint>) ->Result<()> {
+    pub fn create_mint(_ctx: Context<CreateMint>) -> Result<()> {
         msg!("Creating a new mint...");
         Ok(())
     }
 
     pub fn mint_tokens(ctx: Context<MintTokens>, amount: u64) -> Result<()> {
         let cpi_accounts = token_interface::MintTo {
-          mint: ctx.accounts.mint.to_account_info(),
-          to: ctx.accounts.token_account.to_account_info(),
-          authority: ctx.accounts.signer.to_account_info(),
+            mint: ctx.accounts.mint.to_account_info(),
+            to: ctx.accounts.token_account.to_account_info(),
+            authority: ctx.accounts.signer.to_account_info(),
         };
         let cpi_program = ctx.accounts.token_program.to_account_info();
         let cpi_context = CpiContext::new(cpi_program, cpi_accounts);
@@ -26,7 +26,7 @@ pub mod solana_spl {
     }
 
     pub fn transfer_tokens(ctx: Context<TransferTokens>, amount: u64) -> Result<()> {
-        let cpi_accounts = token_interface::TransferChecked{
+        let cpi_accounts = token_interface::TransferChecked {
             from: ctx.accounts.from.to_account_info(),
             to: ctx.accounts.to.to_account_info(),
             mint: ctx.accounts.mint.to_account_info(),
@@ -67,12 +67,13 @@ pub struct CreateMint<'info> {
 pub struct MintTokens<'info> {
     #[account(mut)] // 设置mut 不写编译不通过
     pub signer: Signer<'info>, // mint authority 必须是Mint的授权者
-    #[account(mut, has_one = mint)] // has_one = mint 👉 Anchor 会检查 token_account.mint == mint.key()，否则报错
+    #[account(mut, has_one = mint)]
+    // has_one = mint 👉 Anchor 会检查 token_account.mint == mint.key()，否则报错
     pub token_account: InterfaceAccount<'info, TokenAccount>, // destination token account  mut: supply 会增加 → 需要 mutable
     #[account(mut)]
     pub mint: InterfaceAccount<'info, Mint>, // 代币Mint   mut: supply 会增加 → 需要 mutable
     #[account(address = anchor_spl::token::ID)]
-    pub token_program: Interface<'info, TokenInterface> // spl token程序
+    pub token_program: Interface<'info, TokenInterface>, // spl token程序
 }
 
 // Transfer
@@ -85,7 +86,7 @@ pub struct TransferTokens<'info> {
     pub mint: InterfaceAccount<'info, Mint>,
     pub authority: Signer<'info>,
     #[account(address = anchor_spl::token::ID)]
-    pub token_program: Interface<'info, TokenInterface>
+    pub token_program: Interface<'info, TokenInterface>,
 }
 
 // 如何理解SPL Token里的Program,Interface,TokenInterface,InterfaceAccount??
